@@ -18,6 +18,7 @@
 
 <script>
 import { Plotly } from "vue-plotly";
+import { transformOliveDataToCategoriesChartData } from "./transformOliveDataToCategoriesChartData.js";
 
 let propertiesTypes = [
   {
@@ -30,31 +31,7 @@ let propertiesTypes = [
   }
 ];
 
-function convertDataToCategories(collection) {
-  let collectionProperties = propertiesTypes.map(option => option.value);
-
-  let categories = {};
-
-  collectionProperties.forEach(property => {
-    collection.forEach(oliveTree => {
-      let propertyValue = oliveTree[property];
-
-      if (!categories[property]) {
-        categories[property] = {};
-      }
-
-      let categoryProperty = categories[property];
-
-      if (!categoryProperty[propertyValue]) {
-        categoryProperty[propertyValue] = 1;
-      } else {
-        categoryProperty[propertyValue]++;
-      }
-    });
-  });
-
-  return categories;
-}
+let collectionProperties = propertiesTypes.map(option => option.value);
 
 export default {
   name: "app",
@@ -65,18 +42,28 @@ export default {
     return {
       propertySelected: propertiesTypes[0].value,
       propertiesTypes,
-      categoriesData: [],
-      chartData: [
-        {
-          x: [],
-          y: [],
-          type: "bar"
-        }
-      ],
+      categoriesData: {},
       layout: {
         title: "Olive tree"
       }
     };
+  },
+
+  computed: {
+    chartData() {
+      let { x, y } = this.categoriesData[this.propertySelected] || {
+        x: [],
+        y: []
+      };
+
+      return [
+        {
+          x,
+          y,
+          type: "bar"
+        }
+      ];
+    }
   },
 
   mounted() {
@@ -90,47 +77,17 @@ export default {
       return promise;
     },
 
-    selectCategoryData(value) {
-      let category = this.categoriesData[value];
-
-      let x = Object.keys(category);
-      let y = Object.values(category);
-
-      return { x, y };
-    },
-
     changePropertySelected(event) {
       this.propertySelected = event.target.value;
     },
 
-    updateChart(x, y) {
-      this.chartData = [
-        {
-          x,
-          y,
-          type: "bar"
-        }
-      ];
-    },
-
     boostrapChart() {
       this.getOliveData().then(data => {
-        this.categoriesData = convertDataToCategories(data.default);
+        this.categoriesData = transformOliveDataToCategoriesChartData(
+          collectionProperties,
+          data.default
+        );
       });
-    },
-
-    onDataChartChange() {
-      let { x, y } = this.selectCategoryData(this.propertySelected);
-      this.updateChart(x, y);
-    }
-  },
-
-  watch: {
-    categoriesData: function() {
-      this.onDataChartChange();
-    },
-    propertySelected: function() {
-      this.onDataChartChange();
     }
   }
 };
