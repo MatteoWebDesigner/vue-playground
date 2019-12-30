@@ -18,14 +18,14 @@
     }
  */
 function transformOliveDataToCategoriesChartData(
-    collectionProperties,
-    collection
+    propertiesNameList,
+    oliveData
 ) {
     let categories = {};
     let categoriesChartData = {};
 
-    collectionProperties.forEach(property => {
-        collection.forEach(oliveTree => {
+    propertiesNameList.forEach(property => {
+        oliveData.forEach(oliveTree => {
             let propertyValue = oliveTree[property];
 
             if (!categories[property]) {
@@ -42,7 +42,7 @@ function transformOliveDataToCategoriesChartData(
         });
     });
 
-    collectionProperties.forEach(property => {
+    propertiesNameList.forEach(property => {
         let category = categories[property];
 
         let x = Object.keys(category);

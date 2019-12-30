@@ -2,12 +2,13 @@
   <div id="app">
     <select @change="changePropertySelected" v-model="propertySelected">
       <option
-        v-for="property in propertiesTypes"
+        v-for="property in oliveProperties"
         :value="property.value"
         :key="property.value"
         >{{ property.label }}
       </option>
     </select>
+
     <Plotly
       :data="chartData"
       :layout="layout"
@@ -20,7 +21,7 @@
 import { Plotly } from "vue-plotly";
 import { transformOliveDataToCategoriesChartData } from "./transformOliveDataToCategoriesChartData.js";
 
-let propertiesTypes = [
+let oliveProperties = [
   {
     value: "color",
     label: "color"
@@ -31,17 +32,19 @@ let propertiesTypes = [
   }
 ];
 
-let collectionProperties = propertiesTypes.map(option => option.value);
+let propertiesList = oliveProperties.map(option => option.value);
 
 export default {
   name: "app",
+
   components: {
     Plotly
   },
+
   data() {
     return {
-      propertySelected: propertiesTypes[0].value,
-      propertiesTypes,
+      propertySelected: oliveProperties[0].value,
+      oliveProperties,
       categoriesData: {},
       layout: {
         title: "Olive tree"
@@ -84,7 +87,7 @@ export default {
     boostrapChart() {
       this.getOliveData().then(data => {
         this.categoriesData = transformOliveDataToCategoriesChartData(
-          collectionProperties,
+          propertiesList,
           data.default
         );
       });
